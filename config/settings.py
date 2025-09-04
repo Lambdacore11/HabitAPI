@@ -1,4 +1,5 @@
 from pathlib import Path
+from rest_framework.routers import DefaultRouter
 
 BASE_DIR = Path(__file__).resolve().parent.parent
 
@@ -16,8 +17,21 @@ INSTALLED_APPS = [
     'django.contrib.messages',
     'django.contrib.staticfiles',
     'rest_framework',
+    'rest_framework.authtoken',
+    'djoser',
     'habit.apps.HabitConfig',
 ]
+
+REST_FRAMEWORK = {
+    'DEFAULT_AUTHENTICATION_CLASSES': (
+        'rest_framework.authentication.TokenAuthentication',
+    ),
+}
+DJOSER = {
+        'URLS': {
+            'router': DefaultRouter(trailing_slash=False)
+        },
+    }
 
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
