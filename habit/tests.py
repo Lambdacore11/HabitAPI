@@ -85,8 +85,8 @@ class ViewTests(APITestCase):
         self.records_detail_url = reverse('dailyrecord-detail', kwargs={'pk': self.record.pk})
 
     def test_get_habits_unauthenticated(self):
-        response = self.client.get(self.habits_list_url)
-        self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
+        response = self.client.get(self.habits_list_url,format='json')
+        self.assertEqual(response.status_code, status.HTTP_401_UNAUTHORIZED)
 
     def test_get_habits_authenticated(self):
         self.client.force_authenticate(user=self.user)
@@ -103,7 +103,7 @@ class ViewTests(APITestCase):
             'target': 5,
             'unit': 'days per week'
         }
-        response = self.client.post(self.habits_list_url, data)
+        response = self.client.post(self.habits_list_url, data, format='json') 
         self.assertEqual(response.status_code, status.HTTP_201_CREATED)
         self.assertEqual(Habit.objects.count(), 2)
         self.assertEqual(response.data['name'], 'Exercise')
@@ -112,7 +112,7 @@ class ViewTests(APITestCase):
     def test_update_own_habit(self):
         self.client.force_authenticate(user=self.user)
         data = {'name': 'Updated Habit'}
-        response = self.client.patch(self.habits_detail_url, data)
+        response = self.client.patch(self.habits_detail_url, data,format='json')
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.habit.refresh_from_db()
         self.assertEqual(self.habit.name, 'Updated Habit')
@@ -142,7 +142,7 @@ class ViewTests(APITestCase):
             'date': '2023-10-28',
             'amount_achieved': 1
         }
-        response = self.client.post(self.records_list_url, data)
+        response = self.client.post(self.records_list_url, data, format='json') 
         self.assertEqual(response.status_code, status.HTTP_201_CREATED)
         self.assertEqual(DailyRecord.objects.count(), 2)
 
@@ -161,7 +161,7 @@ class ViewTests(APITestCase):
             'date': '2023-10-28',
             'amount_achieved': 1
         }
-        response = self.client.post(self.records_list_url, data)
+        response = self.client.post(self.records_list_url, data, format='json') 
         self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
 
     def test_record_validation_less_than_zero(self):
@@ -171,7 +171,7 @@ class ViewTests(APITestCase):
             'date': '2023-10-28',
             'amount_achieved': -1
         }
-        response = self.client.post(self.records_list_url, data)
+        response = self.client.post(self.records_list_url, data, format='json')
         self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
 
     def test_unique_record_validation(self):
@@ -181,7 +181,7 @@ class ViewTests(APITestCase):
             'date': date.today().isoformat(),
             'amount_achieved': 2
         }
-        response = self.client.post(self.records_list_url, data)
+        response = self.client.post(self.records_list_url, data, format='json') 
         self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
 
 
@@ -308,7 +308,7 @@ class IntegrationTests(APITestCase):
             'target': 7,
             'unit': 'days per week'
         }
-        response = self.client.post(reverse('habit-list'), habit_data)
+        response = self.client.post(reverse('habit-list'), habit_data,format='json')
         self.assertEqual(response.status_code, status.HTTP_201_CREATED)
         habit_id = response.data['id']
         
@@ -318,7 +318,7 @@ class IntegrationTests(APITestCase):
                 'date': (date.today() - timedelta(days=day)).isoformat(),
                 'amount_achieved': 1
             }
-            response = self.client.post(reverse('dailyrecord-list'), record_data)
+            response = self.client.post(reverse('dailyrecord-list'), record_data,format='json')
             self.assertEqual(response.status_code, status.HTTP_201_CREATED)
         
         response = self.client.get(reverse('habit-detail', kwargs={'pk': habit_id}))
@@ -329,7 +329,8 @@ class IntegrationTests(APITestCase):
         update_data = {'amount_achieved': 2}
         response = self.client.patch(
             reverse('dailyrecord-detail', kwargs={'pk': record_id}),
-            update_data
+            update_data,
+            format = 'json'
         )
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.assertEqual(response.data['amount_achieved'], 2)
