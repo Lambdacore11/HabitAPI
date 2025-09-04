@@ -1,5 +1,5 @@
 from pathlib import Path
-from rest_framework.routers import DefaultRouter
+import os
 
 BASE_DIR = Path(__file__).resolve().parent.parent
 
@@ -7,7 +7,7 @@ SECRET_KEY = 'django-insecure-5yr%#xt5h^qw0_mh3e8)a4tabx5l8w!h2y%=#w%1uqh%pk^k=j
 
 DEBUG = True
 
-ALLOWED_HOSTS = []
+ALLOWED_HOSTS = ['0.0.0.0','localhost','127.0.0.1']
 
 INSTALLED_APPS = [
     'django.contrib.admin',
@@ -26,12 +26,13 @@ REST_FRAMEWORK = {
     'DEFAULT_AUTHENTICATION_CLASSES': (
         'rest_framework.authentication.TokenAuthentication',
     ),
+    'DEFAULT_RENDERER_CLASSES': [
+        'rest_framework.renderers.JSONRenderer',
+    ],
+    'DEFAULT_PARSER_CLASSES': [
+        'rest_framework.parsers.JSONParser',
+    ],
 }
-DJOSER = {
-        'URLS': {
-            'router': DefaultRouter(trailing_slash=False)
-        },
-    }
 
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
@@ -64,8 +65,13 @@ WSGI_APPLICATION = 'config.wsgi.application'
 
 DATABASES = {
     'default': {
-        'ENGINE': 'django.db.backends.sqlite3',
-        'NAME': BASE_DIR / 'db.sqlite3',
+        'ENGINE': 'django.db.backends.postgresql',
+        'NAME': os.environ.get('POSTGRES_DB'),
+        'USER': os.environ.get('POSTGRES_USER'),
+        'PASSWORD': os.environ.get('POSTGRES_PASSWORD'),
+        'HOST':'db',
+        'PORT':5432,
+        
     }
 }
 
@@ -92,6 +98,9 @@ USE_I18N = True
 
 USE_TZ = True
 
-STATIC_URL = 'static/'
+STATIC_URL = '/static/'
+STATIC_ROOT = os.path.join(BASE_DIR,'static') 
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
+
+
