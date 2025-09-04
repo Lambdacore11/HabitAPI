@@ -1,3 +1,4 @@
+from django.db.models import Prefetch, Avg, Max,Sum
 from rest_framework import viewsets
 from rest_framework.exceptions import PermissionDenied
 from rest_framework.permissions import IsAuthenticated
@@ -10,7 +11,16 @@ class HabitViewSet(viewsets.ModelViewSet):
     permission_classes = [IsAuthenticated,IsOwner]
 
     def get_queryset(self):
-        return Habit.objects.filter(user=self.request.user).prefetch_related('daily_records')
+        daily_records_prefetch = Prefetch(
+            'daily_records',
+            queryset=DailyRecord.objects.only('id', 'date', 'amount_achieved',),
+            to_attr='prefetched_daily_records'
+        )
+        return Habit.objects.filter(user=self.request.user).prefetch_related(daily_records_prefetch).annotate(
+            average = Avg('daily_records__amount_achieved'),
+            total = Sum(('daily_records__amount_achieved')),
+            best = Max(('daily_records__amount_achieved'))
+        )
 
     def perform_create(self, serializer):
         serializer.save(user = self.request.user)

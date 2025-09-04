@@ -19,7 +19,10 @@ class DailyRecordSerializer(serializers.ModelSerializer):
 
 class HabitSerializer(serializers.ModelSerializer):
     user = serializers.StringRelatedField(read_only=True)
-    daily_records = DailyRecordSerializer(many=True,read_only=True)
+    daily_records = serializers.SerializerMethodField() 
+    total = serializers.IntegerField(read_only=True)
+    average = serializers.FloatField(read_only=True )
+    best = serializers.IntegerField(read_only=True)
 
     class Meta:
         model = Habit
@@ -31,5 +34,21 @@ class HabitSerializer(serializers.ModelSerializer):
             'target',
             'unit',
             'daily_records',
+            'total',
+            'average',
+            'best',
         ]
         read_only_fields = ('id','user') 
+    
+    def get_daily_records(self, obj):
+        records = getattr(obj, 'prefetched_daily_records', None)
+        if records is None:
+            records = obj.daily_records.only('id', 'date', 'amount_achieved').all()
+        return [
+            {
+                'id': record.id,
+                'date': record.date,
+                'amount_achieved': record.amount_achieved
+            }
+            for record in records
+        ]
