@@ -1,4 +1,5 @@
 from rest_framework import viewsets
+from rest_framework.exceptions import PermissionDenied
 from rest_framework.permissions import IsAuthenticated
 from .models import Habit,DailyRecord
 from .serializers import HabitSerializer,DailyRecordSerializer
@@ -17,6 +18,12 @@ class HabitViewSet(viewsets.ModelViewSet):
 class DailyRecordViewSet(viewsets.ModelViewSet):
     serializer_class = DailyRecordSerializer
     permission_classes = [IsAuthenticated,IsOwner]
+
+    def perform_create(self, serializer):
+        habit = serializer.validated_data['habit']
+        if habit.user != self.request.user:
+            raise PermissionDenied("You can only create records for your own habits.")
+        serializer.save()
 
     def get_queryset(self):
         return DailyRecord.objects.filter(habit__user=self.request.user).select_related('habit')
