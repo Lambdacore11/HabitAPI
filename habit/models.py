@@ -8,7 +8,8 @@ class Habit(models.Model):
     description = models.CharField(max_length=100)
     target = models.IntegerField(validators=[MinValueValidator(1)])
     unit = models.CharField(max_length=20)
-
+    success = models.BooleanField(default=False)
+    
     def __str__(self):
         return f'{self.name} {self.user.username}'
 

@@ -37,6 +37,7 @@ class HabitSerializer(serializers.ModelSerializer):
             'total',
             'average',
             'best',
+            'success'
         ]
         read_only_fields = ('id','user') 
     
