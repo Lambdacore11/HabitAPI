@@ -5,7 +5,7 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 
 SECRET_KEY = 'django-insecure-5yr%#xt5h^qw0_mh3e8)a4tabx5l8w!h2y%=#w%1uqh%pk^k=j'
 
-DEBUG = True
+DEBUG = False
 
 ALLOWED_HOSTS = ['0.0.0.0','localhost','127.0.0.1']
 
@@ -64,7 +64,6 @@ TEMPLATES = [
 WSGI_APPLICATION = 'config.wsgi.application'
 
 if DEBUG:
-    
     DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.sqlite3',
